@@ -1,0 +1,38 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fundo: Gradiente Azul-Marinho Arredondado -->
+  <rect width="512" height="512" rx="115" fill="url(#paint0_linear_1_2)"/>
+  
+  <!-- Definições de Gradientes -->
+  <defs>
+    <!-- Fundo Escuro -->
+    <linearGradient id="paint0_linear_1_2" x1="256" y1="0" x2="256" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1E3A8A"/> <!-- Azul Royal Escuro -->
+      <stop offset="1" stop-color="#0F172A"/> <!-- Quase Preto/Azul Noite -->
+    </linearGradient>
+    
+    <!-- Moeda Dourada -->
+    <radialGradient id="coinGold" cx="0.5" cy="0.5" r="0.5">
+      <stop stop-color="#FCD34D"/> <!-- Amarelo Claro -->
+      <stop offset="1" stop-color="#D97706"/> <!-- Âmbar/Ouro Velho -->
+    </radialGradient>
+  </defs>
+
+  <!-- Letra C Branca Grossa -->
+  <!-- Usamos um path customizado para simular o traço grosso arredondado do teu design -->
+  <path d="M340 160C290 110 200 110 150 160C100 210 100 300 150 350C200 400 290 400 340 350" 
+        stroke="white" stroke-width="65" stroke-linecap="round" fill="none"/>
+        
+  <!-- Ponto Final do C (opcional, dependendo da curva exata, mas o stroke-round já ajuda) -->
+
+  <!-- Moeda Dourada com Símbolo Euro -->
+  <g transform="translate(320, 320)">
+        
+    <!-- Corpo da Moeda -->
+    <circle cx="40" cy="-60" r="40" fill="url(#coinGold)" stroke="#B45309" stroke-width="2"/>
+    
+    <!-- Símbolo Euro (€) Centralizado -->
+    <text x="40" y="-40" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" 
+          font-size="55" font-weight="bold" fill="#78350F" text-anchor="middle">€</text>
+            
+  </g>
+</svg>
