@@ -1,0 +1,17 @@
+{
+  "name": "Ciclo: Gestor de Finanças",
+  "short_name": "Ciclo",
+  "description": "Gestor de finanças pessoais por ciclo salarial",
+  "lang": "pt-PT",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b2f5c",
+  "theme_color": "#0b2f5c",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
