@@ -541,11 +541,18 @@ function renderDash(){
   document.getElementById('dBar').style.width=Math.min(100,pctRec)+'%';
   document.getElementById('dBarL').textContent=hv('Gasto '+fmt(tS)+' · '+(totalIn>0?Math.round(pctRec):0)+'% do recebido');
   document.getElementById('dCeil').textContent=hv('Recebido: '+fmt(totalIn));
-  const fc=fundoManeio>=0?'#bbf7d0':'#fed7aa';
-  document.getElementById('dFund').innerHTML=
-    `<span>Orçamentado ${hv(fmt(tC))}</span><span>·</span>`+
-    `<span>Recebido ${hv(fmt(totalIn))}</span><span>·</span>`+
-    `<span>Fundo de maneio <b style="color:${fc}">${hv((fundoManeio>=0?'+':'−')+fmt(Math.abs(fundoManeio)))}</b></span>`;
+  if(totalIn===0){
+    document.getElementById('dFund').innerHTML=
+      `<span>Orçamentado ${hv(fmt(tC))}</span><span>·</span>`+
+      `<span>Recebido ${hv(fmt(totalIn))}</span><span>·</span>`+
+      `<span>Fundo de maneio <b style="color:#94a3b8">— aguarda entradas</b></span>`;
+  }else{
+    const fc=fundoManeio>=0?'#bbf7d0':'#fed7aa';
+    document.getElementById('dFund').innerHTML=
+      `<span>Orçamentado ${hv(fmt(tC))}</span><span>·</span>`+
+      `<span>Recebido ${hv(fmt(totalIn))}</span><span>·</span>`+
+      `<span>Fundo de maneio <b style="color:${fc}">${hv((fundoManeio>=0?'+':'−')+fmt(Math.abs(fundoManeio)))}</b></span>`;
+  }
   document.getElementById('dIn').textContent=hv(fmt(totalIn));
   document.getElementById('dOut').textContent=hv(fmt(tS));
   document.getElementById('dProv').textContent=hv(fmt(provBal()));
