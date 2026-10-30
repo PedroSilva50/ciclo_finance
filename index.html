@@ -670,26 +670,111 @@ function renderResumo(){
   renderResumoData(cur);
 }
 function renderResumoData(c){
+  // Filtragem segura de datas
   const txs=S.transactions.filter(t=>{const d=new Date(t.date+'T00:00:00');return d>=c.s&&d<=c.e});
   const incs=S.incomes.filter(i=>{const d=new Date(i.date+'T00:00:00');return d>=c.s&&d<=c.e});
-  const tI=incs.reduce((s,i)=>s+i.amount,0),tO=txs.reduce((s,t)=>s+t.amount,0);
+  
+  // Cálculos totais
+  const tI=incs.reduce((s,i)=>s+i.amount,0);
+  const tO=txs.reduce((s,t)=>s+t.amount,0);
+  
+  // Atualização dos KPIs do Resumo
   document.getElementById('rIn').textContent=hv(fmt(tI));
   document.getElementById('rOut').textContent=hv(fmt(tO));
   document.getElementById('rDiff').textContent=hv(fmt(tI-tO));
   document.getElementById('rDiff').className='right '+(tI-tO>=0?'pos':'neg');
+  
+  // Lista Mini de Entradas
   const entMini=document.getElementById('entListMini');
-  if(incs.length===0){entMini.innerHTML='<div class="empty" style="padding:12px"><p>Sem entradas este mês</p></div>'}
-  else{entMini.innerHTML=incs.slice().sort((a,b)=>new Date(b.date)-new Date(a.date)).map(i=>`<div class="row"><div class="left"><div class="title">${i.description||i.type}</div><div class="sub">${new Date(i.date).toLocaleDateString('pt-PT')}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="right pos">+${hv(fmt(i.amount))}</div><span class="sa" onclick="editInc(${i.id})">✏️</span><span class="sa" onclick="delInc(${i.id})">🗑️</span></div></div>`).join('')}
-  const byC={};txs.forEach(t=>{const cat=S.categories.find(x=>x.id===t.catId);const nm=cat?(cat.name==='__provisao__'?'Provisões':cat.name==='__poupanca__'?'Poupança':cat.name):'?';byC[nm]=(byC[nm]||0)+t.amount});
-  const labels=Object.keys(byC),data=Object.values(byC),colors=labels.map(l=>{const cat=S.categories.find(x=>(x.name==='__provisao__'&&l==='Provisões')||(x.name==='__poupanca__'&&l==='Poupança')||x.name===l);return cat?cat.color:'#94a3b8'});
-  if(cCat){cCat.destroy();cCat=null}const ctx=document.getElementById('cCat').getContext('2d');
-  if(labels.length&&!S.hideValues){cCat=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}}}}})}
-  else{ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);ctx.font='14px sans-serif';ctx.fillStyle='#94a3b8';ctx.textAlign='center';ctx.fillText((S.hideValues&&labels.length?'Valores ocultos':'Sem despesas'),ctx.canvas.width/2,ctx.canvas.height/2)}
+  if(incs.length===0){
+    entMini.innerHTML='<div class="empty" style="padding:12px"><p>Sem entradas este mês</p></div>';
+  } else {
+    entMini.innerHTML=incs.slice().sort((a,b)=>new Date(b.date)-new Date(a.date)).map(i=>
+      `<div class="row">
+        <div class="left">
+          <div class="title">${i.description||i.type}</div>
+          <div class="sub">${new Date(i.date).toLocaleDateString('pt-PT')}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="right pos">+${hv(fmt(i.amount))}</div>
+          <span class="sa" onclick="editInc(${i.id})">✏️</span>
+          <span class="sa" onclick="delInc(${i.id})">🗑️</span>
+        </div>
+      </div>`
+    ).join('');
+  }
+
+  // Agrupamento por Categoria
+  const byC={};
+  txs.forEach(t=>{
+    const cat=S.categories.find(x=>x.id===t.catId);
+    const nm=cat?(cat.name==='__provisao__'?'Provisões':cat.name==='__poupanca__'?'Poupança':cat.name):'?';
+    byC[nm]=(byC[nm]||0)+t.amount;
+  });
+
+  const labels=Object.keys(byC);
+  const data=Object.values(byC);
+
+  // ✅ PALETA DE CORES DISTINTAS (Fix para o gráfico)
+  const distinctColors = [
+    '#6366f1', // Indigo (Provisões/Principal)
+    '#f59e0b', // Âmbar (Poupança)
+    '#ec4899', // Rosa (Extras)
+    '#f97316', // Laranja (Gasolina/Portagens)
+    '#ef4444', // Vermelho (Restauração)
+    '#10b981', // Esmeralda (Alimentação)
+    '#8b5cf6', // Violeta (Saúde)
+    '#14b8a6', // Teal (PT/Fixas)
+    '#a855f7', // Roxo (Padaria/Lazer)
+    '#3b82f6', // Azul Royal (Vestuário)
+    '#e11d48', // Carmesim (Escola/Educação)
+    '#0ea5e9', // Sky Blue (Luz/Água)
+    '#84cc16', // Lima (Outros Fixos)
+    '#d946ef'  // Fuchsia (Variáveis Extra)
+  ];
+
+  // Aplica as cores ciclicamente para garantir que nunca se repetem nas primeiras 14 categorias
+  const colors = labels.map((_, i) => distinctColors[i % distinctColors.length]);
+
+  // Renderização do Gráfico Chart.js
+  if(cCat){cCat.destroy();cCat=null}
+  const ctx=document.getElementById('cCat').getContext('2d');
+  
+  if(labels.length && !S.hideValues){
+    cCat=new Chart(ctx,{
+      type:'doughnut',
+      data:{
+        labels,
+        datasets:[{data, backgroundColor:colors, borderWidth:0}]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+          legend:{
+            position:'bottom',
+            labels:{boxWidth:12, font:{size:11}, padding:15}
+          }
+        }
+      }
+    });
+  } else {
+    ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+    ctx.font='14px sans-serif';
+    ctx.fillStyle='#94a3b8';
+    ctx.textAlign='center';
+    ctx.fillText((S.hideValues && labels.length ? 'Valores ocultos' : 'Sem despesas'), ctx.canvas.width/2, ctx.canvas.height/2);
+  }
+
+  // Variáveis globais para filtros externos (se existirem na tua UI)
   window._mvTxs=txs;
-  const sel=document.getElementById('mvCat'),prev=sel.value;
-  sel.innerHTML='<option value="">Todas as categorias</option>'+S.categories.map(c=>`<option value="${c.id}">${c.icon} ${esc(qaName(c))}</option>`).join('');
-  sel.value=[...sel.options].some(o=>o.value===prev)?prev:'';
-  renderTxList();
+  const sel=document.getElementById('mvCat');
+  if(sel){
+    const prev=sel.value;
+    sel.innerHTML='<option value="">Todas as categorias</option>'+S.categories.map(c=>`<option value="${c.id}">${c.icon} ${esc(qaName(c))}</option>`).join('');
+    sel.value=[...sel.options].some(o=>o.value===prev)?prev:'';
+    renderTxList();
+  }
 }
 function renderTxList(){
   const list=document.getElementById('rTxList'),q=(document.getElementById('mvQ').value||'').trim().toLowerCase(),cid=document.getElementById('mvCat').value,all=window._mvTxs||[];
