@@ -200,6 +200,17 @@ body.wlock{overflow:hidden}
 </style>
 </head>
 <body>
+<!-- MODAL DE ATUALIZAÇÃO -->
+<div class="mb active" id="updateModal" style="z-index:9999; display:none;">
+  <div class="sheet" style="text-align:center; padding:30px 20px;">
+    <div style="width:60px;height:60px;border-radius:50%;background:var(--brand-soft);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:var(--brand)">
+      <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+    </div>
+    <h2 style="margin-bottom:8px">Ciclo foi atualizado</h2>
+    <p style="color:var(--muted);margin-bottom:24px;font-size:14px;line-height:1.5">Detetámos uma nova versão com melhorias importantes.<br>Por favor, recarrega a página para garantir que tens as funcionalidades mais recentes e seguras.</p>
+    <button class="btn btn-primary btn-block" onclick="location.reload()">Recarregar Agora</button>
+  </div>
+</div>
 
 <div class="welcome active" id="welcome"><div class="w-in">
   <img class="w-mark" src="icons/apple-touch-icon.png" alt="Ciclo">
@@ -212,7 +223,7 @@ body.wlock{overflow:hidden}
   <button class="w-chk" id="wChk" role="switch" aria-checked="false" onclick="toggleW()"><span class="w-box"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Mostrar saldo ao entrar</button>
   <button class="w-go" onclick="enterApp()">Entrar →</button>
   <div class="w-foot">Podes mudar isto a qualquer momento no 👁️</div>
-  <div class="w-foot" style="margin-top:4px;opacity:.55">Versão 2026.10.05-c</div>
+  <div class="w-foot" style="margin-top:4px;opacity:.55">Versão de Teste</div>
 </div></div>
 <div class="setup" id="setup">
   <div class="step" id="sStep">Passo 1 de 2</div>
@@ -1125,13 +1136,44 @@ function showWelcome(){
   goTo('dash');renderAll();
   document.getElementById('welcome').classList.add('active');document.body.classList.add('wlock');
 }
+// ... (código anterior da enterApp) ...
 function enterApp(){
   S.hideValues=(wChoice==='hide');try{localStorage.setItem('fin_wc',wChoice);localStorage.setItem('fin_last',new Date().toISOString())}catch(e){}
   document.getElementById('welcome').classList.remove('active');document.body.classList.remove('wlock');
   renderAll();window.scrollTo(0,0);
 }
-let wChoice='hide';
-async function init(){await load();bindHeader();if(!S.settings.done){document.getElementById('welcome').classList.remove('active');showSetup();renderAll()}else showWelcome()}
+
+// ✅ PONTO 2: CONTROLO DE VERSÃO E ATUALIZAÇÃO (Colocar ANTES do init)
+const APP_VERSION = 'ciclo-2026.10.30'; 
+
+function checkUpdate() {
+  const storedVersion = localStorage.getItem('ciclo_app_version');
+  
+  if (storedVersion !== APP_VERSION) {
+    document.getElementById('updateModal').style.display = 'flex';
+    // Guarda a nova versão apenas quando o utilizador clicar em recarregar
+    localStorage.setItem('ciclo_app_version', APP_VERSION);
+  } else {
+    document.getElementById('updateModal').style.display = 'none';
+  }
+}
+
+let wChoice='hide'; // ✅ Mantém apenas UMA declaração desta variável
+
+async function init(){
+  await load();
+  bindHeader();
+  checkUpdate(); // ✅ Chamada obrigatória aqui para verificar a versão ao arrancar
+  
+  if(!S.settings.done){
+    document.getElementById('welcome').classList.remove('active');
+    showSetup();
+    renderAll()
+  } else {
+    showWelcome()
+  }
+}
+
 init();
 </script>
 <script>if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update&&r.update()).catch(()=>{}))}</script>
